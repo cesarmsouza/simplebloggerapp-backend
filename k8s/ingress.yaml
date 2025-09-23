@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sblog-ing
+  namespace: sblog
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: sblog.YOUR_DOMAIN_OR_NIPIO   # ex: sblog.34.201.10.20.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sblog-svc
+                port:
+                  number: 80
