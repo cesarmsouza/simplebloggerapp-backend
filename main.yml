@@ -63,3 +63,26 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=medium # Exemplo: apenas vulnerabilidades de média ou alta severidade
+            sca-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Run OWASP Dependency-Check
+        # Usaremos um container Docker para o Dependency-Check
+        # para evitar a instalação manual de Java e do próprio DC.
+        run: |
+          docker run --rm \
+            -v $(pwd):/src \
+            owasp/dependency-check:latest \
+            --scan /src \
+            --format HTML \
+            --project "simplebloggerapp-backend" \
+            --out /src/dependency-check-report.html
+      
+      - name: Upload Dependency-Check Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-check-report
+          path: dependency-check-report.html
