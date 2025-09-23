@@ -41,3 +41,25 @@ jobs:
           context: .
           push: true
           tags: ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }},${{ env.DOCKER_IMAGE_NAME }}:latest
+
+            sast-scan:
+    runs-on: ubuntu-latest
+    needs: build-and-push # Depende da imagem ser construída
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Run Snyk Container Scan
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }} # Escaneia a imagem recém-construída
+          args: --file=Dockerfile --severity-threshold=high # Exemplo: apenas vulnerabilidades de alta severidade
+      
+      - name: Run Snyk Code Scan
+        uses: snyk/actions/maven@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=medium # Exemplo: apenas vulnerabilidades de média ou alta severidade
