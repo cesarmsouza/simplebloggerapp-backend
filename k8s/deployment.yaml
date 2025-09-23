@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sblog-api
+  namespace: sblog
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sblog-api
+  template:
+    metadata:
+      labels:
+        app: sblog-api
+    spec:
+      containers:
+        - name: sblog-api
+          image: DOCKERHUB_USERNAME/simplebloggerapp-backend:{{ .TAG }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 30
+      imagePullSecrets:
+        - name: dockerhub-cred
